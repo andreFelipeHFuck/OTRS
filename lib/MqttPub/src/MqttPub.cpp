@@ -46,14 +46,19 @@ void MqttPub::setup(void){
 
 void MqttPub::pub_topic(const uint8_t* pic_buf, size_t length){
 
-    if(!client.publish(topic_pic, (const char*) pic_buf, length)){
+    client.beginPublish(topic_pic, length, 0);
+
+    for(int i=0; i < length; i++){
+        client.write(pic_buf[i]);
+    }
+
+    if(!client.endPublish()){
         DBG("Sending Failed!");
     }else{
         DBG("MQTT Publish succesful");
         DBG("buffer is " + String(length) + " bytes");
     }
 
-    deep_sleep();
 }
 
 void MqttPub::pub_topic(const char* msg){
