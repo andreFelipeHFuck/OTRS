@@ -1,0 +1,7 @@
+python-env/bin
+python-env/include
+python-env/lib
+python-env/lib64
+python-env/pyvenv.cfg
+python-env/__pycache__
+python-env/contatos.txt
