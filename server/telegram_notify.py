@@ -1,7 +1,6 @@
 import logging
 import os
 import asyncio
-import schedule
 from telegram import Bot
 
 # Configuração do logging
