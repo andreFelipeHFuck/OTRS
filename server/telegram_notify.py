@@ -1,23 +1,26 @@
 import logging
 import os
-import asyncio
+
 from telegram import Bot
+from dotenv import load_dotenv
 
 # Configuração do logging
 logger = logging.getLogger(__name__)
 
-CONTACTS_FILE = "./python-env/contatos.txt"
-TOKEN = "7264200561:AAGX-DV5oo7TO2X7Y4NLzIvVcXngDeJJtWU"
+load_dotenv()
 
-message = "Aviso: O nível de gás supervisionado pelo ESP32 está baixo!"
+contacts_list = os.getenv("CONTACTS_FILE")
+token = os.getenv("TELEGRAM_BOT_TOKEN")
+
+# message = "Aviso: O nível de gás supervisionado pelo ESP32 está baixo!"
 
 # Inicializa o bot
-telegram_bot = Bot(token=TOKEN)
+telegram_bot = Bot(token=token)
 
 
-async def enviar_notificacao() -> None:
-    if os.path.exists(CONTACTS_FILE):
-        with open(CONTACTS_FILE, "r") as file:
+async def send_to_contacts(message) -> None:
+    if os.path.exists(contacts_list):
+        with open(contacts_list, "r") as file:
             user_ids = file.readlines()
 
         for user_id in user_ids:
@@ -31,7 +34,3 @@ async def enviar_notificacao() -> None:
         logger.info("Notificações enviadas com sucesso.")
     else:
         logger.warning("Nenhum usuário registrado para notificações.")
-
-
-# Envia notificação
-asyncio.run(enviar_notificacao())

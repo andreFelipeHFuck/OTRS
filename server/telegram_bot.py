@@ -1,5 +1,7 @@
 import logging
 import os
+from dotenv import load_dotenv
+
 from telegram import ForceReply, Update
 from telegram.ext import (
     Application,
@@ -10,17 +12,18 @@ from telegram.ext import (
     filters,
 )
 
-# Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
-# set higher logging level for httpx to avoid all GET and POST requests being logged
+
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-CONTACTS_FILE = "./python-env/contatos.txt"
-TOKEN = "7264200561:AAGX-DV5oo7TO2X7Y4NLzIvVcXngDeJJtWU"
+load_dotenv()
+
+contacts_list = os.getenv("CONTACTS_FILE")
+token = os.getenv("TELEGRAM_BOT_TOKEN")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -34,17 +37,18 @@ async def notificar(update: Update, _: CallbackContext) -> None:
     user_id = update.message.from_user.id
 
     # Checa se arquivo existe, caso não, o cria
-    if not os.path.exists(CONTACTS_FILE):
-        open(CONTACTS_FILE, "w").close()
+    if not os.path.exists(contacts_list):
+        open(contacts_list, "w").close()
 
     # Lê os IDs de usuário do arquivo
-    with open(CONTACTS_FILE, "r") as file:
+    with open(contacts_list, "r") as file:
         user_ids = file.read().splitlines()
 
     if str(user_id) not in user_ids:
-        with open(CONTACTS_FILE, "a") as file:
+        with open(contacts_list, "a") as file:
             file.write(f"{user_id}\n")
         await update.message.reply_text("Você será notificado!")
+        logger.info(f"Usuário {user_id} registrado para notificações.")
     else:
         await update.message.reply_text("Você já está registrado para notificações.")
 
@@ -55,18 +59,19 @@ async def remover(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     not_reg = False
 
     # Lê os IDs de usuário do arquivo
-    if os.path.exists(CONTACTS_FILE):
-        with open(CONTACTS_FILE, "r") as file:
+    if os.path.exists(contacts_list):
+        with open(contacts_list, "r") as file:
             user_ids = file.read().splitlines()
 
         # Verifica se o ID do usuário está no arquivo
         if user_id in user_ids:
             user_ids.remove(user_id)
-            with open(CONTACTS_FILE, "w") as file:
-                file.write("".join(user_ids) + "\n")
+            with open(contacts_list, "w") as file:
+                file.write("".join(user_ids))
             await update.message.reply_text(
                 "Você foi removido da lista e não será mais notificado!"
             )
+            logger.info(f"Usuário {user_id} removido da lista de notificações.")
         else:
             not_reg = True
     else:
@@ -84,7 +89,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 def main() -> None:
     """Start the bot."""
     # Create the Application and pass it your bot's token.
-    application = Application.builder().token(TOKEN).build()
+    application = Application.builder().token(token).build()
 
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("notificar", notificar))

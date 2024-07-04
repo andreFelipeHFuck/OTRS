@@ -1,5 +1,11 @@
 import numpy as np
+import os
 import cv2
+import cv2
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
+os.environ["TESSDATA_PREFIX"] = "/usr/share/tessdata/"
 
 debug = True
 
@@ -26,7 +32,7 @@ def calculate_black_pixel_percentage(image, x1, y1, x2, y2, qx):
     return (black_pixels_count / total_pixels) * 100
 
 
-def process_image(image_path):
+def process_image_manometro(image_path):
     img = cv2.imread(image_path)
 
     show_image(img, "Original")
@@ -159,13 +165,31 @@ def process_image(image_path):
     for i, perc in enumerate(percentages, 1):
         print(f"Porcentagem de pixels pretos no Quadrante {i}: {perc:.2f}%")
 
-    perc_1, perc_2, perc_3, perc_4 = percentages
+    perc_2 = percentages[1]
 
     if perc_2 > 30:
-        print("Gás está acabando.")
+        print("Nível de gás baixo!")
 
+    # [perc_1, perc_2, perc_3, perc_4]
     return percentages
 
 
-# Chamada da função com o caminho da imagem
-# process_image("./images/picture49.jpg")
+def process_image_digital(image_path):
+    # Carregar a imagem
+    imagem = cv2.imread(image_path)
+
+    # Converter a imagem para escala de cinza
+    imagem_cinza = cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY)
+
+    # Aplicar threshold para melhorar o contraste do texto
+    _, imagem_binaria = cv2.threshold(imagem_cinza, 150, 255, cv2.THRESH_BINARY)
+
+    # Usar Tesseract para detectar os números na imagem
+    detect_num = pytesseract.image_to_string(imagem_binaria, config="digits")
+
+    detect_num = detect_num.replace("\n", "").strip()
+
+    if detect_num.isdigit():
+        detect_num = detect_num[:-1] + "." + detect_num[-1]
+
+    return float(detect_num)
