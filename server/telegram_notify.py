@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -12,7 +13,7 @@ load_dotenv()
 contacts_list = os.getenv("CONTACTS_FILE")
 token = os.getenv("TELEGRAM_BOT_TOKEN")
 
-# message = "Aviso: O nível de gás supervisionado pelo ESP32 está baixo!"
+# msg_teste = "Aviso: O nível de gás supervisionado pelo ESP32 está baixo!"
 
 # Inicializa o bot
 telegram_bot = Bot(token=token)
@@ -34,3 +35,6 @@ async def send_to_contacts(message) -> None:
         logger.info("Notificações enviadas com sucesso.")
     else:
         logger.warning("Nenhum usuário registrado para notificações.")
+
+
+# asyncio.run(send_to_contacts(msg_teste))

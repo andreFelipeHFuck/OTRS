@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import cv2
-import cv2
 import pytesseract
 
 pytesseract.pytesseract.tesseract_cmd = r"/usr/bin/tesseract"
