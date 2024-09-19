@@ -16,7 +16,7 @@ InfluxClient = InfluxDBClient(url="http://localhost:8086", token=token)
 
 # WRITE
 
-# write_api = write_client.write_api(write_options=SYNCHRONOUS)
+# write_api = InfluxClient.write_api(write_options=SYNCHRONOUS)
    
 # for value in range(5):
 #   point = (
@@ -24,12 +24,15 @@ InfluxClient = InfluxDBClient(url="http://localhost:8086", token=token)
 #     .tag("tagname1", "tagvalue1")
 #     .field("field1", value)
 #   )
+#   print(point)
 #   write_api.write(bucket=bucket, org="UDESC", record=point)
+#   import time
 #   time.sleep(1) # separate points by 1 second
 
-# query_api = write_client.query_api()
 
 # READ QUERY
+
+# query_api = InfluxClient.query_api()
 
 # query = """from(bucket: "Manometros")
 #  |> range(start: -10m)
