@@ -1,7 +1,7 @@
 from flask import request, make_response, jsonify
+
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.exceptions import InfluxDBError
-
 
 from src.config.dbConnect import InfluxClient, bucket, org
 from src.models.manometer import Manometer
@@ -17,21 +17,18 @@ class ManometerController:
         return manometer
 
     @staticmethod
-    def createManometerPoint(req):
+    def createManometerPoint(req, state, value):
         manometer = ManometerController._createManometerToJson(req=req)
-        point = manometer.create_point(state=True, value=0.1)
-        print(point)
+
+        point = manometer.create_point(state=state, value=value)
 
         try:
             write_api = InfluxClient.write_api(write_options=SYNCHRONOUS)
             write_api.write(bucket=bucket, org=org, record=point)
-            return make_response(
-                 jsonify({'message': "File sent successfully", 'point': f"{point}"}),
-                  200
-                )
+
+            return state, value
+       
         except InfluxDBError as e:
             raise e
-            return make_response(
-               jsonify({"error": "No files found, file not in request"}),
-                400
-            )
+        
+        
